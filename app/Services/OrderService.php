@@ -25,18 +25,68 @@ class OrderService
     {
         // TODO: Complete this method
 
-        // check affiliate if exist return other create
-        $order = Order::firstWhere([
-            'customer_email' => $data['customer_email']
-        ]);
+       // $user = User::where('email', $data['customer_email'])->first();
 
-        if(is_null($order)) {
-            Affiliate::create([
-                'user_id' => 1,
-                'merchant_id' => 1,
-                'commission_rate' => 0.5,
-                'discount_code' => $data['discount_code']
+       // dd($user);
+       // if(!$user) {
+            // $user = User::create([
+            //     'name' => $data['customer_name'],
+            //     'email' => $data['customer_email'],
+            //     'type' => User::TYPE_AFFILIATE
+            // ]);
+         //   $merchant = Merchant::firstWhere('domain', $data['merchant_domain']);
+
+          //  $this->affiliateService->register($merchant, $data['customer_email'], $data['customer_name'], 0.1);
+
+           // $user = User::where('email', $data['customer_email'])->first();
+          //  dd($user);
+       // }
+
+       // dd($user->affiliate()->first());
+
+      //  if(!$user->affiliate) {
+          //  try {
+       //         $this->affiliateService->register($merchant, $data['customer_email'], $data['customer_name'], 0.1);
+         //   } catch(\Exception $e) {}
+
+       //     $user = $user->load('affiliate');
+      //  }
+
+        // Order::firstOrCreate(
+        // [
+        //     'external_order_id' => $data['order_id']
+        // ],
+        // [
+        //     'subtotal' => $data['subtotal_price'],
+        //     'affiliate_id' => $user->affiliate->id,
+        //     'merchant_id' => $merchant->id,
+        //     'commission_owed' => $data['subtotal_price'] * $user->affiliate->commission_rate,
+        // ]);
+
+        // Duplicate error test
+        $user = User::where('email', $data['customer_email'])->first();
+
+        if(!$user) {
+            $user = User::create([
+                'name' => $data['customer_name'],
+                'email' => $data['customer_email'],
+                'type' => User::TYPE_AFFILIATE
             ]);
         }
+
+        $merchant = Merchant::firstOrCreate([
+            'domain' => $data['merchant_domain']
+        ], [
+            'display_name' => $data['customer_name'],
+            'user_id' => $user->id,
+        ]);
+
+        Order::firstOrCreate([
+            'external_order_id' => $data['order_id']
+        ], [
+            'merchant_id' => $merchant->id,
+            'subtotal' => $data['subtotal_price'],
+            'external_order_id' => $data['order_id']
+        ]);
     }
 }
