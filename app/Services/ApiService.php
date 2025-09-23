@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Affiliate;
+use RuntimeException;
 use App\Models\Merchant;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 /**
  * You don't need to do anything here. This is just to help
@@ -37,6 +36,6 @@ class ApiService
      */
     public function sendPayout(string $email, float $amount)
     {
-        //
+        throw new RuntimeException();
     }
 }

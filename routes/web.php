@@ -19,6 +19,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/webhook', WebhookController::class)->name('webhook');
+Route::post('/webhook', WebhookController::class)->name('webhook');
 
 Route::get('/merchant/order-stats', [MerchantController::class, 'orderStats'])->name('merchant.order-stats');

@@ -25,6 +25,12 @@ class OrderService
     {
         // TODO: Complete this method
 
+        $order = Order::firstWhere('order_id', $data['order_id']);
+
+        if($order) {
+            \Log::info("Commission: $order->commission_owed");
+        }
+
        // $user = User::where('email', $data['customer_email'])->first();
 
        // dd($user);
@@ -64,29 +70,30 @@ class OrderService
         // ]);
 
         // Duplicate error test
-        $user = User::where('email', $data['customer_email'])->first();
+        if(isset($data['customer_email'])) {
+            $user = User::where('email', $data['customer_email'])->first();
+            if(!$user) {
+                $user = User::create([
+                    'name' => $data['customer_name'],
+                    'email' => $data['customer_email'],
+                    'type' => User::TYPE_AFFILIATE
+                ]);
+            }
 
-        if(!$user) {
-            $user = User::create([
-                'name' => $data['customer_name'],
-                'email' => $data['customer_email'],
-                'type' => User::TYPE_AFFILIATE
+            $merchant = Merchant::firstOrCreate([
+                'domain' => $data['merchant_domain']
+            ], [
+                'display_name' => $data['customer_name'],
+                'user_id' => $user->id,
+            ]);
+
+            Order::firstOrCreate([
+                'external_order_id' => $data['order_id']
+            ], [
+                'merchant_id' => $merchant->id,
+                'subtotal' => $data['subtotal_price'],
+                'external_order_id' => $data['order_id']
             ]);
         }
-
-        $merchant = Merchant::firstOrCreate([
-            'domain' => $data['merchant_domain']
-        ], [
-            'display_name' => $data['customer_name'],
-            'user_id' => $user->id,
-        ]);
-
-        Order::firstOrCreate([
-            'external_order_id' => $data['order_id']
-        ], [
-            'merchant_id' => $merchant->id,
-            'subtotal' => $data['subtotal_price'],
-            'external_order_id' => $data['order_id']
-        ]);
     }
 }
