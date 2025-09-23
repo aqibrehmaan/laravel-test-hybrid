@@ -8,6 +8,7 @@ use App\Models\Affiliate;
 use App\Models\Merchant;
 use App\Models\Order;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Mail;
 
 class AffiliateService
@@ -28,6 +29,16 @@ class AffiliateService
     public function register(Merchant $merchant, string $email, string $name, float $commissionRate): Affiliate
     {
         // TODO: Complete this method
+        $user = User::where('email', $email)
+                    ->where(function ($q) {
+                        $q->where('type', User::TYPE_MERCHANT)->orWhere('type', User::TYPE_AFFILIATE);
+                    })->first();
+
+        if($user?->type == User::TYPE_MERCHANT) {
+            throw new AffiliateCreateException('Email is associated with a merchant');
+        } else if($user?->type == User::TYPE_AFFILIATE) {
+            throw new AffiliateCreateException('Email is associated with a Affiliate');
+        }
 
         $affiliate = Affiliate::create([
             'user_id' => $merchant->user->id,
