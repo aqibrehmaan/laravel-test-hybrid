@@ -13,8 +13,3 @@ Tested on these **PHP 8.0** and **Composer v2+** versions.
 * Generate `APP_KEY` running this command `php artisan key:generate`
 * Create `database.sqlite` file in database directory
 * Migrate the database using `php artisan migrate`
-
-## Running the project
-
-In order to run this project we need to:
-* Run `php artisan serve`
