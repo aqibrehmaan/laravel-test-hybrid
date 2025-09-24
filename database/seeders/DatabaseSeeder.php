@@ -17,10 +17,5 @@ class DatabaseSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-        $user = User::factory()->create();
-        $merchant = Merchant::factory()->for($user)->create();
-        $affiliate = Affiliate::factory()->for($user)->for($merchant)->create();
-        Order::factory()->for($merchant)->for($affiliate)->create();
-    }
+    {}
 }
