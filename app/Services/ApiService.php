@@ -36,6 +36,8 @@ class ApiService
      */
     public function sendPayout(string $email, float $amount)
     {
+        // This is just an example
+        // Mail::to($email)->send(new OrderPayoutMail($amount));
         throw new RuntimeException('Payout failed');
     }
 }

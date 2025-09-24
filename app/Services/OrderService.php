@@ -70,7 +70,7 @@ class OrderService
 
         // Duplicate error test
         if(isset($data['customer_email'])) {
-            $user = User::where('email', $data['customer_email'])->first();
+            $user = User::firstWhere('email', $data['customer_email']);
             if(!$user) {
                 $user = User::create([
                     'name' => $data['customer_name'],
