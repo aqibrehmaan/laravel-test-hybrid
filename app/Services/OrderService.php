@@ -57,15 +57,17 @@ class OrderService
             $this->affiliateService->register($merchant, $data['customer_email'], $data['customer_name'], 0.1);
         } catch(\Exception $e) {}
 
+        $affiliate = Affiliate::first();
+
         Order::firstOrCreate(
             [
               'external_order_id' => $data['order_id']
             ],
             [
             'subtotal' => $data['subtotal_price'],
-          //  'affiliate_id' => Affiliate::first()->id,
+            'affiliate_id' => $affiliate?->id,
             'merchant_id' => $merchant->id,
-           // 'commission_owed' => $data['subtotal_price'] * Affiliate::first()->commission_rate
+            'commission_owed' => $data['subtotal_price'] * $affiliate?->commission_rate
         ]);
 
         // Duplicate error test
