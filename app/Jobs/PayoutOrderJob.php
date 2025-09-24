@@ -38,13 +38,14 @@ class PayoutOrderJob implements ShouldQueue
         $order = $this->order->load('affiliate.user');
 
         try {
+            DB::beginTransaction();
             $apiService->sendPayout($order->affiliate->user->email, $this->order->commission_owed);
             $order->payout_status = Order::STATUS_PAID;
             $order->save();
+            DB::commit();
         } catch(\Exception $e) {
-            $order->payout_status = Order::STATUS_UNPAID;
-            $order->save();
-            throw new RuntimeException;
+            DB::rollBack();
+            throw new RuntimeException($e->getMessage());
         }
     }
 }

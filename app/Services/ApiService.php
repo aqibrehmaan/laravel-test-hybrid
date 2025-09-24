@@ -36,6 +36,6 @@ class ApiService
      */
     public function sendPayout(string $email, float $amount)
     {
-        throw new RuntimeException();
+        throw new RuntimeException('Payout failed');
     }
 }

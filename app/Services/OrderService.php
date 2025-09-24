@@ -25,49 +25,48 @@ class OrderService
     {
         // TODO: Complete this method
 
-        $order = Order::firstWhere('order_id', $data['order_id']);
+        $order = Order::firstWhere('external_order_id', $data['order_id']);
 
         if($order) {
             \Log::info("Commission: $order->commission_owed");
         }
 
-       // $user = User::where('email', $data['customer_email'])->first();
+        $user = User::with('affiliate')->where([
+                'email' => $data['customer_email'],
+                'type' => User::TYPE_AFFILIATE
+            ])->first();
 
-       // dd($user);
-       // if(!$user) {
-            // $user = User::create([
-            //     'name' => $data['customer_name'],
-            //     'email' => $data['customer_email'],
-            //     'type' => User::TYPE_AFFILIATE
-            // ]);
-         //   $merchant = Merchant::firstWhere('domain', $data['merchant_domain']);
+        if(!$user) {
+            $user = User::create([
+                'name' => $data['customer_name'],
+                'email' => $data['customer_email'],
+                'type' => User::TYPE_AFFILIATE
+            ]);
+        }
 
-          //  $this->affiliateService->register($merchant, $data['customer_email'], $data['customer_name'], 0.1);
+        $merchant = Merchant::firstWhere('domain', $data['merchant_domain']);
 
-           // $user = User::where('email', $data['customer_email'])->first();
-          //  dd($user);
-       // }
+        if(!$merchant) {
+            $merchant = $user->merchant()->create([
+                'domain' => $data['merchant_domain'],
+                'display_name' => $data['customer_name']
+            ]);
+        }
 
-       // dd($user->affiliate()->first());
+        try {
+            $this->affiliateService->register($merchant, $data['customer_email'], $data['customer_name'], 0.1);
+        } catch(\Exception $e) {}
 
-      //  if(!$user->affiliate) {
-          //  try {
-       //         $this->affiliateService->register($merchant, $data['customer_email'], $data['customer_name'], 0.1);
-         //   } catch(\Exception $e) {}
-
-       //     $user = $user->load('affiliate');
-      //  }
-
-        // Order::firstOrCreate(
-        // [
-        //     'external_order_id' => $data['order_id']
-        // ],
-        // [
-        //     'subtotal' => $data['subtotal_price'],
-        //     'affiliate_id' => $user->affiliate->id,
-        //     'merchant_id' => $merchant->id,
-        //     'commission_owed' => $data['subtotal_price'] * $user->affiliate->commission_rate,
-        // ]);
+        Order::firstOrCreate(
+            [
+              'external_order_id' => $data['order_id']
+            ],
+            [
+            'subtotal' => $data['subtotal_price'],
+          //  'affiliate_id' => Affiliate::first()->id,
+            'merchant_id' => $merchant->id,
+           // 'commission_owed' => $data['subtotal_price'] * Affiliate::first()->commission_rate
+        ]);
 
         // Duplicate error test
         if(isset($data['customer_email'])) {
@@ -80,12 +79,14 @@ class OrderService
                 ]);
             }
 
-            $merchant = Merchant::firstOrCreate([
-                'domain' => $data['merchant_domain']
-            ], [
-                'display_name' => $data['customer_name'],
-                'user_id' => $user->id,
-            ]);
+            $merchant = Merchant::firstWhere('domain', $data['merchant_domain']);
+
+            if(!$merchant) {
+                $merchant = $user->merchant()->create([
+                    'domain' => $data['merchant_domain'],
+                    'display_name' => $data['customer_name']
+                ]);
+            }
 
             Order::firstOrCreate([
                 'external_order_id' => $data['order_id']
